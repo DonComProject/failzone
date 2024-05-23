@@ -4,7 +4,6 @@
 ---
 - name: Playbook de instalación de herramientas de navegación (tor)
   hosts: all
-  remote_user: pepito
   become: yes
   tasks:
 
