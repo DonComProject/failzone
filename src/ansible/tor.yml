@@ -1,81 +1,42 @@
-#El playbook funciona e instala tor pero a la hora de volver a actualizar paquetes nos encontramos con:
-   #FAILED! => {"changed": false, "msg": "Failed to update apt cache: E:El repositorio «https://deb.torproject.org/torproject.org $(lsb_release Release» no tiene un fichero de Publicación., W:No se puede actualizar de un repositorio como este de forma segura y por tanto está deshabilitado por omisión., W:Vea la página de manual apt-secure(8) para los detalles sobre la creación de repositorios y la configuración de usuarios., W:https://deb.nodesource.com/node_14.x/dists/jammy/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details."}
-#Para resolver esto hemos decidido no implementar tor y hemos creado otro playbook que resuelve el problema (eliminar_tor.yml) 
+#The playbook works and installs tor but when it comes to updating packages again we find: 
+#FAILED! => {"changed": false, "msg": "Failed to update apt cache: E:El repositorio «https://deb.torproject.org/torproject.org $(lsb_release Release» no tiene un fichero de Publicación., W:No se puede actualizar de un repositorio como este de forma segura y por tanto está deshabilitado por omisión., W:Vea la página de manual apt-secure(8) para los detalles sobre la creación de repositorios y la configuración de usuarios., W:https://deb.nodesource.com/node_14.x/dists/jammy/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details."}
+#To solve this we have decided not to implement tor and we have created another playbook that solves the problem (remove_tor.yml)
+
 ---
-- name: Playbook de instalación de herramientas de navegación (tor)
+- name: Navigation Tools Installation Playbook (Tor)
   hosts: all
   become: yes
   tasks:
 
-  - name: Actualizar la lista de paquetes
+  - name: Update package list
     apt:
       update_cache: yes
 
-
-  - name: Instalar dependencias para Tor Browser
+  - name: Install dependencies for Tor Browser
     apt:
       name: apt-transport-https
       state: present
     tags: torbrowser
 
-  - name: Descargar clave GPG de Tor Browser desde Ubuntu keyserver
+  - name: Download Tor Browser GPG key from Ubuntu keyserver
     ansible.builtin.get_url:
       url: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
       dest: /tmp/torproject-archive-keyring.gpg
     tags: torbrowser
 
-  - name: Agregar clave GPG de Tor Browser
+  - name: Add Tor Browser GPG Key
     ansible.builtin.command: apt-key add /tmp/torproject-archive-keyring.gpg
     tags: torbrowser
 
-  - name: Agregar repositorio de Tor Browser
+  - name: Add Tor Browser repository
     ansible.builtin.copy:
       content: |
         deb https://deb.torproject.org/torproject.org $(lsb_release -cs) main
       dest: /etc/apt/sources.list.d/torproject.list
     tags: torbrowser
 
-  - name: Instalar Tor Browser
+  - name: Install Tor Browser
     apt:
       name: torbrowser-launcher
       state: present
----
-- name: Playbook de instalación de herramientas de navegación (tor)
-  hosts: all
-  remote_user: pepito
-  become: yes
-  tasks:
-
-  - name: Actualizar la lista de paquetes
-    apt:
-      update_cache: yes
-
-
-  - name: Instalar dependencias para Tor Browser
-    apt:
-      name: apt-transport-https
-      state: present
-    tags: torbrowser
-
-  - name: Descargar clave GPG de Tor Browser desde Ubuntu keyserver
-    ansible.builtin.get_url:
-      url: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xA3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
-      dest: /tmp/torproject-archive-keyring.gpg
-    tags: torbrowser
-
-  - name: Agregar clave GPG de Tor Browser
-    ansible.builtin.command: apt-key add /tmp/torproject-archive-keyring.gpg
-    tags: torbrowser
-
-  - name: Agregar repositorio de Tor Browser
-    ansible.builtin.copy:
-      content: |
-        deb https://deb.torproject.org/torproject.org $(lsb_release -cs) main
-      dest: /etc/apt/sources.list.d/torproject.list
-    tags: torbrowser
-
-  - name: Instalar Tor Browser
-    apt:
-      name: torbrowser-launcher
-      state: present
-    tags: torbrowser
+      
