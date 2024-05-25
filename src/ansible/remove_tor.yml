@@ -1,22 +1,22 @@
-#Playbook destinado a resolver el problema generado con otro playbook de instalación de tor (tor.yml)
+#Playbook intended to solve the problem generated with another tor installation playbook (tor.yml)
 ---
-- name: Playbook elimminar configuración erronea Tor
+- name: PPlaybook remove Tor misconfiguration
   hosts: all
   become: yes
   tasks:
 
-  - name: Eliminar archivos de configuración anteriores de Tor
+  - name: Delete previous Tor configuration files
     file:
       path: /etc/apt/sources.list.d/torproject.list
       state: absent
     tags: cleanup
 
-  - name: Eliminar claves GPG antiguas de Tor
+  - name: Delete old GPG keys from Tor
     command: apt-key del A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
     ignore_errors: yes
     tags: cleanup
 
-  - name: Desinstalar Tor Browser
+  - name: Uninstall Tor Browser
     apt:
       name: torbrowser-launcher
       state: absent
